@@ -2,10 +2,10 @@ import express from "express";
 
 const router = express.Router();
 
-// TEMP fake database
+
 const users = [];
 
-// REGISTER
+
 router.post("/register", (req, res) => {
   const { name, email, password } = req.body;
 
@@ -20,7 +20,7 @@ router.post("/register", (req, res) => {
   res.json({ name });
 });
 
-// LOGIN
+
 router.post("/login", (req, res) => {
   const { email, password } = req.body;
 
