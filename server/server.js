@@ -9,7 +9,7 @@ const app = express();
 connectDB();
 app.use(cors());
 app.use(express.json());
-app.use("/complaints", complaintRoutes);
+app.use("/api/complaints", complaintRoutes);
 
 app.listen(process.env.PORT, () => {
   console.log("Server running on 5000");

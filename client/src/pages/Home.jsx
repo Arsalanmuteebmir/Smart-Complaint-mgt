@@ -1,41 +1,76 @@
 import { useState, useEffect } from "react";
 import API from "../api/axios";
 
-
-const CATEGORIES = ["Roads & Infrastructure", "Water Supply", "Electricity", "Sanitation", "Public Safety", "Parks & Recreation", "Other"];
+const CATEGORIES = [
+  "Roads & Infrastructure",
+  "Water Supply",
+  "Electricity",
+  "Sanitation",
+  "Public Safety",
+  "Parks & Recreation",
+  "Other"
+];
 
 export default function Home() {
-  const [title, setTitle]           = useState("");
+  const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory]     = useState("");
-  const [list, setList]             = useState([]);
+  const [category, setCategory] = useState("");
+  const [list, setList] = useState([]); // always expect array
 
-  const fetchData = () => {
-    API.get("/complaints").then(res => setList(res.data));
+  // ✅ safer fetch
+  const fetchData = async () => {
+    try {
+      const res = await API.get("/complaints");
+
+      // 🔥 IMPORTANT FIX:
+      // backend usually returns { complaints: [...] }
+      const data = Array.isArray(res.data)
+        ? res.data
+        : res.data?.complaints || [];
+
+      setList(data);
+    } catch (err) {
+      console.log(err);
+      setList([]); // fallback safety
+    }
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-  const addComplaint = () => {
+  const addComplaint = async () => {
     if (!title.trim()) return;
-    API.post("/complaints", { title, description, category }).then(() => fetchData());
+    await API.post("/complaints", { title, description, category });
+    setTitle("");
+    setDescription("");
+    setCategory("");
+    fetchData();
   };
 
-  const updateStatus = (id) => {
-    API.put("/complaints/" + id, { status: "Resolved" }).then(() => fetchData());
+  const updateStatus = async (id) => {
+    await API.put("/complaints/" + id, { status: "Resolved" });
+    fetchData();
   };
 
-  const deleteComplaint = (id) => {
-    API.delete("/complaints/" + id).then(() => fetchData());
+  const deleteComplaint = async (id) => {
+    await API.delete("/complaints/" + id);
+    fetchData();
   };
 
-  const openCount     = list.filter(c => c.status !== "Resolved").length;
-  const resolvedCount = list.filter(c => c.status === "Resolved").length;
+  // ✅ Safe counters
+  const openCount = Array.isArray(list)
+    ? list.filter(c => c.status !== "Resolved").length
+    : 0;
+
+  const resolvedCount = Array.isArray(list)
+    ? list.filter(c => c.status === "Resolved").length
+    : 0;
 
   return (
     <div className="portal-wrapper">
 
-      {/* ── Header ── */}
+      {/* Header */}
       <header className="portal-header">
         <div className="header-left">
           <div className="header-eyebrow">Citizen Services</div>
@@ -44,11 +79,12 @@ export default function Home() {
           </h1>
         </div>
         <div className="header-badge">
-          <strong>{openCount}</strong> open · <strong>{resolvedCount}</strong> resolved
+          <strong>{openCount}</strong> open ·{" "}
+          <strong>{resolvedCount}</strong> resolved
         </div>
       </header>
 
-      {/* ── Submit Form ── */}
+      {/* Submit Form */}
       <div className="form-card">
         <div className="form-title">
           <span className="icon">📝</span>
@@ -67,7 +103,10 @@ export default function Home() {
 
           <div className="form-group">
             <label>Category</label>
-            <select value={category} onChange={e => setCategory(e.target.value)}>
+            <select
+              value={category}
+              onChange={e => setCategory(e.target.value)}
+            >
               <option value="">Select a category</option>
               {CATEGORIES.map(cat => (
                 <option key={cat} value={cat}>{cat}</option>
@@ -90,7 +129,7 @@ export default function Home() {
         </button>
       </div>
 
-      {/* ── Complaints List ── */}
+      {/* Complaints List */}
       <div className="list-header">
         <h2 className="list-title">All Complaints</h2>
         <span className="count-pill">{list.length} total</span>
@@ -108,9 +147,15 @@ export default function Home() {
               <div>
                 <div className="card-meta">
                   {c.category && (
-                    <span className="badge badge-category">📁 {c.category}</span>
+                    <span className="badge badge-category">
+                      📁 {c.category}
+                    </span>
                   )}
-                  <span className={`badge ${c.status === "Resolved" ? "badge-resolved" : "badge-open"}`}>
+                  <span className={`badge ${
+                    c.status === "Resolved"
+                      ? "badge-resolved"
+                      : "badge-open"
+                  }`}>
                     {c.status || "Open"}
                   </span>
                 </div>
@@ -124,11 +169,17 @@ export default function Home() {
 
             <div className="card-actions">
               {c.status !== "Resolved" && (
-                <button className="btn btn-resolve" onClick={() => updateStatus(c._id)}>
+                <button
+                  className="btn btn-resolve"
+                  onClick={() => updateStatus(c._id)}
+                >
                   ✓ Mark Resolved
                 </button>
               )}
-              <button className="btn btn-delete" onClick={() => deleteComplaint(c._id)}>
+              <button
+                className="btn btn-delete"
+                onClick={() => deleteComplaint(c._id)}
+              >
                 ✕ Delete
               </button>
             </div>
