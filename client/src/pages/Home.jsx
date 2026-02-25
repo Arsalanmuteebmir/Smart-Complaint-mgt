@@ -11,19 +11,17 @@ const CATEGORIES = [
   "Other"
 ];
 
-export default function Home() {
+export default function Home({ user, setUser }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
-  const [list, setList] = useState([]); // always expect array
+  const [list, setList] = useState([]);
 
-  // ✅ safer fetch
+  // ✅ Fetch complaints
   const fetchData = async () => {
     try {
       const res = await API.get("/complaints");
 
-      // 🔥 IMPORTANT FIX:
-      // backend usually returns { complaints: [...] }
       const data = Array.isArray(res.data)
         ? res.data
         : res.data?.complaints || [];
@@ -31,7 +29,7 @@ export default function Home() {
       setList(data);
     } catch (err) {
       console.log(err);
-      setList([]); // fallback safety
+      setList([]);
     }
   };
 
@@ -41,10 +39,13 @@ export default function Home() {
 
   const addComplaint = async () => {
     if (!title.trim()) return;
+
     await API.post("/complaints", { title, description, category });
+
     setTitle("");
     setDescription("");
     setCategory("");
+
     fetchData();
   };
 
@@ -58,17 +59,41 @@ export default function Home() {
     fetchData();
   };
 
-  // ✅ Safe counters
-  const openCount = Array.isArray(list)
-    ? list.filter(c => c.status !== "Resolved").length
-    : 0;
+  const openCount = list.filter(c => c.status !== "Resolved").length;
+  const resolvedCount = list.filter(c => c.status === "Resolved").length;
 
-  const resolvedCount = Array.isArray(list)
-    ? list.filter(c => c.status === "Resolved").length
-    : 0;
+  // ✅ Logout handler
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    setUser(null);
+  };
 
   return (
     <div className="portal-wrapper">
+
+      {/* 🔥 LOGIN HEADER PART */}
+      <div style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: "20px"
+      }}>
+        <h3>Welcome {user}</h3>
+
+        <button
+          onClick={handleLogout}
+          style={{
+            padding: "6px 12px",
+            background: "#e74c3c",
+            color: "white",
+            border: "none",
+            borderRadius: "6px",
+            cursor: "pointer"
+          }}
+        >
+          Logout
+        </button>
+      </div>
 
       {/* Header */}
       <header className="portal-header">
@@ -78,6 +103,7 @@ export default function Home() {
             Complaint <span>Portal</span>
           </h1>
         </div>
+
         <div className="header-badge">
           <strong>{openCount}</strong> open ·{" "}
           <strong>{resolvedCount}</strong> resolved
@@ -138,7 +164,7 @@ export default function Home() {
       {list.length === 0 ? (
         <div className="empty-state">
           <div className="empty-icon">📭</div>
-          <p>No complaints filed yet. Be the first to report an issue.</p>
+          <p>No complaints filed yet.</p>
         </div>
       ) : (
         list.map(c => (
@@ -151,6 +177,7 @@ export default function Home() {
                       📁 {c.category}
                     </span>
                   )}
+
                   <span className={`badge ${
                     c.status === "Resolved"
                       ? "badge-resolved"
@@ -159,6 +186,7 @@ export default function Home() {
                     {c.status || "Open"}
                   </span>
                 </div>
+
                 <div className="card-title">{c.title}</div>
               </div>
             </div>
@@ -176,6 +204,7 @@ export default function Home() {
                   ✓ Mark Resolved
                 </button>
               )}
+
               <button
                 className="btn btn-delete"
                 onClick={() => deleteComplaint(c._id)}
