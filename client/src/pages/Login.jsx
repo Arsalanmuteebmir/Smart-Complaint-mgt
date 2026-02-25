@@ -1,30 +1,36 @@
 import { useState } from "react";
+import API from "../api/axios";
 
-export default function Login({ setUser }) {
-  const [name, setName] = useState("");
+export default function Login({ setUser, setPage }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleLogin = () => {
-    const users = JSON.parse(localStorage.getItem("users")) || [];
+  const handleLogin = async () => {
+    const res = await API.post("/auth/login", { email, password });
 
-    if (!users.includes(name)) {
-      alert("User not registered");
-      return;
-    }
-
-    localStorage.setItem("user", name);
-    setUser(name);
+    localStorage.setItem("user", res.data.name);
+    setUser(res.data.name);
   };
 
   return (
     <div style={{ padding: 20 }}>
       <h2>Login</h2>
 
+      <input placeholder="Email" onChange={e => setEmail(e.target.value)} />
       <input
-        placeholder="Enter your name"
-        onChange={(e) => setName(e.target.value)}
+        type="password"
+        placeholder="Password"
+        onChange={e => setPassword(e.target.value)}
       />
 
       <button onClick={handleLogin}>Login</button>
+
+      <p>
+        New user?{" "}
+        <button onClick={() => setPage("register")}>
+          Register
+        </button>
+      </p>
     </div>
   );
 }
