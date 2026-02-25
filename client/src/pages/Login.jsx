@@ -10,6 +10,7 @@ export default function Login({ setUser, setPage }) {
 
     localStorage.setItem("user", res.data.name);
     setUser(res.data.name);
+    setPage("home")
   };
 
   return (
