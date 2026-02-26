@@ -13,7 +13,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://smart-complaint-mgt-new.vercel.app/"
+      "https://smart-complaint-mgt-new.vercel.app"
     ],
     credentials: true,
   })
