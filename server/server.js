@@ -11,14 +11,22 @@ connectDB();
 
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://smart-complaint-mgt-new.vercel.app"
-    ],
+    origin: function (origin, callback) {
+      const allowedOrigins = [
+        "http://localhost:5173",
+        "https://smart-complaint-mgt-new.vercel.app"
+      ];
+      
+      // Allows the main URLs OR any Vercel preview URL
+      if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );
-
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
