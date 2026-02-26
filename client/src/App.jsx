@@ -26,6 +26,8 @@ export default function App() {
       {page === "home" && (
         <Home user={user} setUser={setUser} setPage={setPage} />
       )}
+      <h3>Designed & Developed by:</h3>
+      <h4>Arsalan & Nabeel</h4>
     </div>
   );
 }

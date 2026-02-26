@@ -188,8 +188,8 @@ export default function Home({ user, setUser, setPage }) {
                                     )}
 
                                     <span className={`badge ${c.status === "Resolved"
-                                            ? "badge-resolved"
-                                            : "badge-open"
+                                        ? "badge-resolved"
+                                        : "badge-open"
                                         }`}>
                                         {c.status || "Open"}
                                     </span>
