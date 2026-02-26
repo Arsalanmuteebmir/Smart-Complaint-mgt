@@ -40,7 +40,7 @@ export default function Home({ user, setUser, setPage }) {
     const addComplaint = async () => {
         if (!title.trim()) return;
 
-        await API.post("/api/complaints", { title, description, category });
+        await API.post("/complaints", { title, description, category });
 
         setTitle("");
         setDescription("");
@@ -50,12 +50,12 @@ export default function Home({ user, setUser, setPage }) {
     };
 
     const updateStatus = async (id) => {
-        await API.put("/api/complaints/" + id, { status: "Resolved" });
+        await API.put("/complaints/" + id, { status: "Resolved" });
         fetchData();
     };
 
     const deleteComplaint = async (id) => {
-        await API.delete("/api/complaints/" + id);
+        await API.delete("/complaints/" + id);
         fetchData();
     };
 
