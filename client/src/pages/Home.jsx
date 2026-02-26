@@ -20,7 +20,7 @@ export default function Home({ user, setUser, setPage }) {
     // ✅ Fetch complaints
     const fetchData = async () => {
         try {
-            const res = await API.get("/api/complaints");
+            const res = await API.get("/complaints");
 
             const data = Array.isArray(res.data)
                 ? res.data
